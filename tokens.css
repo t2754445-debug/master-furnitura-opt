@@ -263,36 +263,49 @@
   }
 
   .mf-frame { font-size: 14px; }
+  /* Защита от горизонтального вылета */
+  html, body, .mf-stage, .mf-doc, .mf-frame { overflow-x: hidden !important; }
 
   /* Декоративные абсолютные слои (шестиугольники, кляксы) — выключаем */
   .mf-frame [aria-hidden="true"] { display: none !important; }
+  /* Декоративные hex внутри заголовков (inline-span с clip-path) — убираем */
+  .mf-frame h1 span[style*="clip-path"],
+  .mf-frame h2 span[style*="clip-path"] { display: none !important; }
 
   /* Картинки/SVG не вылезают */
-  .mf-frame img, .mf-frame svg, .mf-frame picture {
-    max-width: 100%;
-    height: auto;
-  }
+  .mf-frame img, .mf-frame picture { max-width: 100%; height: auto; }
 
   /* ── HEADER ── */
   /* Скрываем верхнюю инфо-полосу и центральную nav */
   .mf-frame header > div:first-child { display: none !important; }
   .mf-frame header nav { display: none !important; }
-  /* Основная строка — лого слева, CTA справа, телефон-блок убираем */
+  /* Основная строка — лого слева, CTA справа */
   .mf-frame header > div:last-child {
     height: auto !important;
-    grid-template-columns: auto 1fr !important;
+    display: flex !important;
+    grid-template-columns: none !important;
+    align-items: center !important;
+    justify-content: space-between !important;
     padding: 12px 16px !important;
-    gap: 12px !important;
+    gap: 10px !important;
   }
-  .mf-frame header > div:last-child > div[style*="flex-end"] {
+  /* Лого: оставляем только иконку, скрываем текстовую часть рядом */
+  .mf-frame header a[href="#top"] > span[style*="border-left"] {
     display: none !important;
   }
-  .mf-frame header > div:last-child > div {
-    justify-content: flex-end !important;
+  .mf-frame header a[href="#top"] svg { width: 36px !important; height: auto !important; }
+  /* Правый блок шапки: скрываем колонку с телефоном, оставляем кнопку */
+  .mf-frame header > div:last-child > div:last-child {
+    gap: 0 !important;
   }
-  /* Подпись "оптовые поставки" возле логотипа — компактнее */
-  .mf-frame header a[href="#top"] > span[style*="border-left"] {
-    padding-left: 10px !important;
+  .mf-frame header > div:last-child > div:last-child > div:first-child {
+    display: none !important;
+  }
+  /* Кнопка в шапке — компактнее */
+  .mf-frame header .mf-btn--primary {
+    height: 40px !important;
+    padding: 0 14px !important;
+    font-size: 13px !important;
   }
 
   /* ── СЕКЦИИ — единый padding ── */
@@ -301,20 +314,18 @@
     padding: 48px 16px !important;
   }
 
-  /* ── ВСЕ многоколоночные грид-сетки → 1 колонка ── */
-  .mf-frame [style*="grid-template-columns: repeat"],
-  .mf-frame [style*="grid-template-columns: 1.05fr"],
-  .mf-frame [style*="grid-template-columns: 1.4fr"],
-  .mf-frame [style*="grid-template-columns: 1fr 1.6fr"],
-  .mf-frame [style*="grid-template-columns: 1fr 1.1fr"],
-  .mf-frame [style*="grid-template-columns: 1fr 1fr"] {
+  /* ── ВСЕ многоколоночные грид-сетки → 1 колонка ──
+     Универсальное правило, чтобы перехватить любой формат значения. */
+  .mf-frame [style*="grid-template-columns"] {
     grid-template-columns: 1fr !important;
     gap: 14px !important;
   }
-  /* Лого клиентов держим в 2 колонки (плотный коллаж) */
+  /* Лого клиентов — в 2 колонки (плотный коллаж) */
   .mf-frame [style*="grid-template-columns: repeat(6"] {
     grid-template-columns: repeat(2, 1fr) !important;
   }
+  /* Кнопка в шапке не должна переноситься */
+  .mf-frame header .mf-btn { white-space: nowrap !important; }
 
   /* span 2 в форме больше не имеет смысла — сбрасываем */
   .mf-frame [style*="grid-column: span 2"] { grid-column: span 1 !important; }
