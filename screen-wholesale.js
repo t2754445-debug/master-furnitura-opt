@@ -2,7 +2,7 @@
 
 // ── Wholesale-only header (no shop chrome) ──────────────────
 const WholesaleHeader = () => {
-  const links = [["Категории", "#cats"], ["Условия", "#tiers"], ["Как работаем", "#flow"], ["Клиенты", "#cases"], ["Вопросы", "#faq"]];
+  const links = [["Категории", "#cats"], ["Условия", "#tiers"], ["Как работаем", "#flow"], ["Клиенты", "#cases"], ["Вопросы", "#faq"], ["Квиз", "#quiz"]];
   return /*#__PURE__*/React.createElement("header", {
     style: {
       position: "relative",
@@ -1611,6 +1611,187 @@ const FAQ = () => {
   }))));
 };
 
+// ── PURCHASE QUIZ — квалификация лида за 5 шагов ───────────
+const QUIZ_STEPS = [{
+  key: "cat",
+  title: "Что закупаете?",
+  sub: "Выберите основную категорию — детали уточним в КП.",
+  options: [{ v: "Мебельная фурнитура", h: "М" }, { v: "Швейная фурнитура", h: "Ш" }, { v: "Рукоделие и бижутерия", h: "Б" }, { v: "Москитные сетки", h: "С" }, { v: "Системы Джокер", h: "Д" }, { v: "Несколько категорий", h: "+" }]
+}, {
+  key: "volume",
+  title: "Объём закупки в месяц?",
+  sub: "От объёма зависит ваш уровень и опт-скидка.",
+  options: [{ v: "до 30 тыс. ₽", tier: 0 }, { v: "30–100 тыс. ₽", tier: 1 }, { v: "100–300 тыс. ₽", tier: 2 }, { v: "300 тыс. – 1 млн ₽", tier: 3 }, { v: "от 1 млн ₽", tier: 3 }]
+}, {
+  key: "timing",
+  title: "Когда нужна первая поставка?",
+  sub: "Если срочно — забронируем склад сразу после получения заявки.",
+  options: [{ v: "Сегодня–завтра", h: "!" }, { v: "На этой неделе", h: "7" }, { v: "В течение месяца", h: "M" }, { v: "Пока подбираем", h: "?" }]
+}, {
+  key: "format",
+  title: "Формат работы",
+  sub: "Подскажет, какие документы готовить и какую цену показывать.",
+  options: [{ v: "ИП / ООО, с НДС", h: "Ю" }, { v: "ИП / ООО, без НДС", h: "У" }, { v: "Самозанятый", h: "С" }, { v: "Физлицо / опт по карте", h: "Ф" }]
+}, {
+  key: "region",
+  title: "Регион доставки",
+  sub: "Подберём оптимальный способ и срок.",
+  options: [{ v: "Самара и область", h: "С" }, { v: "Москва / Санкт-Петербург", h: "М" }, { v: "ЦФО / Поволжье", h: "Ц" }, { v: "Урал / Сибирь / ДФО", h: "У" }, { v: "СНГ", h: "+" }]
+}];
+const QUIZ_TIERS = [{ name: "Старт", disc: "−7%", desc: "Базовый опт без договора, оплата картой или СБП." }, { name: "Партнёр", disc: "−12%", desc: "Договор, отсрочка до 14 дней, УПД в ЭДО." }, { name: "Дилер", disc: "−18%", desc: "Закреплённый менеджер, бронь склада, отсрочка до 30 дней." }, { name: "Контракт", disc: "инд.", desc: "Индивидуальные условия, импорт под объём, сертификация." }];
+
+const PurchaseQuiz = () => {
+  const [step, setStep] = React.useState(0);
+  const [answers, setAnswers] = React.useState({});
+  const [contact, setContact] = React.useState({ name: "", phone: "", company: "" });
+  const [sent, setSent] = React.useState(false);
+
+  const total = QUIZ_STEPS.length;
+  const done = step >= total;
+  const tierIdx = (() => {
+    const v = answers.volume;
+    const opt = (QUIZ_STEPS[1].options || []).find(o => o.v === v);
+    return opt ? opt.tier : 0;
+  })();
+  const tier = QUIZ_TIERS[tierIdx];
+
+  const choose = (key, value) => {
+    setAnswers(a => ({ ...a, [key]: value }));
+    setTimeout(() => setStep(s => Math.min(s + 1, total)), 180);
+  };
+  const back = () => setStep(s => Math.max(0, s - 1));
+  const restart = () => { setStep(0); setAnswers({}); setContact({ name: "", phone: "", company: "" }); setSent(false); };
+
+  const progress = Math.min(100, Math.round(((done ? total : step) / total) * 100));
+
+  return /*#__PURE__*/React.createElement("section", {
+    id: "quiz",
+    style: {
+      padding: "100px 40px",
+      background: "var(--mf-paper)",
+      position: "relative",
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    "aria-hidden": true,
+    style: { position: "absolute", right: -120, top: -120, width: 380, aspectRatio: "0.866/1", clipPath: "var(--hex-clip)", background: "var(--mf-green-100)", opacity: .55 }
+  }), /*#__PURE__*/React.createElement("div", {
+    "aria-hidden": true,
+    style: { position: "absolute", left: -80, bottom: -80, width: 260, aspectRatio: "0.866/1", clipPath: "var(--hex-clip)", background: "var(--mf-stone-100)" }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: { display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 40, gap: 40, position: "relative" }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", { className: "mf-eyebrow" }, "07 · Квиз на закупку"), /*#__PURE__*/React.createElement("h2", {
+    style: { fontSize: 64, lineHeight: .95, marginTop: 14, maxWidth: 780 }
+  }, "Подберём ваш уровень — ", /*#__PURE__*/React.createElement("em", { style: { color: "var(--mf-green-700)" } }, "5 вопросов"), ".")), /*#__PURE__*/React.createElement("p", {
+    style: { maxWidth: 360, fontSize: 15, color: "var(--mf-stone-500)", lineHeight: 1.55 }
+  }, "Ответьте на 5 простых вопросов — и менеджер пришлёт прайс под ваш объём, формат работы и регион. Без обязательств.")), /*#__PURE__*/React.createElement("div", {
+    style: { position: "relative", background: "var(--mf-white)", border: "1px solid var(--mf-stone-200)", borderRadius: 20, padding: 36, boxShadow: "var(--mf-shadow-card)", overflow: "hidden" }
+  },
+  /* progress */
+  /*#__PURE__*/React.createElement("div", {
+    style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22, gap: 16, flexWrap: "wrap" }
+  }, /*#__PURE__*/React.createElement("div", { className: "mf-mono", style: { fontSize: 11, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--mf-stone-500)" } }, done ? "результат" : `шаг ${step + 1} из ${total}`),
+  /*#__PURE__*/React.createElement("div", {
+    style: { flex: 1, minWidth: 180, height: 6, background: "var(--mf-stone-100)", borderRadius: 99, overflow: "hidden" }
+  }, /*#__PURE__*/React.createElement("div", { style: { width: `${progress}%`, height: "100%", background: "var(--mf-green-500)", transition: "width .3s" } })),
+  /*#__PURE__*/React.createElement("div", { className: "mf-mono", style: { fontSize: 11, color: "var(--mf-stone-500)" } }, `${progress}%`),
+  step > 0 && !done && /*#__PURE__*/React.createElement("button", {
+    onClick: back, className: "mf-btn mf-btn--sm mf-btn--light"
+  }, "← Назад")),
+
+  /* steps */
+  !done && QUIZ_STEPS.map((q, qi) => qi === step && /*#__PURE__*/React.createElement("div", {
+    key: q.key
+  }, /*#__PURE__*/React.createElement("h3", {
+    style: { fontFamily: "var(--mf-font-display)", fontSize: 30, lineHeight: 1.1, color: "var(--mf-ink)", marginBottom: 8 }
+  }, q.title),
+  q.sub && /*#__PURE__*/React.createElement("p", {
+    style: { fontSize: 14, color: "var(--mf-stone-500)", marginBottom: 22, lineHeight: 1.5 }
+  }, q.sub),
+  /*#__PURE__*/React.createElement("div", {
+    style: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }
+  }, q.options.map(o => {
+    const selected = answers[q.key] === o.v;
+    return /*#__PURE__*/React.createElement("button", {
+      key: o.v,
+      onClick: () => choose(q.key, o.v),
+      style: {
+        textAlign: "left",
+        padding: "16px 16px",
+        background: selected ? "var(--mf-green-700)" : "var(--mf-white)",
+        color: selected ? "#fff" : "var(--mf-ink)",
+        border: `1px solid ${selected ? "var(--mf-green-700)" : "var(--mf-stone-200)"}`,
+        borderRadius: 12,
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "center",
+        gap: 14,
+        transition: "background .15s, border-color .15s, color .15s",
+        font: "inherit"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: { width: 38, aspectRatio: "0.866/1", clipPath: "var(--hex-clip)", background: selected ? "var(--mf-green-300)" : "var(--mf-stone-100)", color: selected ? "var(--mf-green-900)" : "var(--mf-green-700)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--mf-font-display)", fontSize: 14, fontWeight: 600, flexShrink: 0 }
+    }, o.h || "·"), /*#__PURE__*/React.createElement("span", { style: { fontSize: 14, fontWeight: 500, lineHeight: 1.3 } }, o.v));
+  })))),
+
+  /* result */
+  done && !sent && /*#__PURE__*/React.createElement("div", null,
+    /*#__PURE__*/React.createElement("div", {
+      style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, alignItems: "stretch" }
+    },
+      /*#__PURE__*/React.createElement("div", {
+        style: { background: tier.name === "Старт" ? "var(--mf-stone-100)" : tier.name === "Партнёр" ? "var(--mf-green-100)" : tier.name === "Дилер" ? "var(--mf-green-700)" : "var(--mf-ink)", color: tier.name === "Дилер" || tier.name === "Контракт" ? "#fff" : "var(--mf-ink)", borderRadius: 16, padding: 28, position: "relative", overflow: "hidden" }
+      },
+        /*#__PURE__*/React.createElement("div", { className: "mf-mono", style: { fontSize: 11, opacity: .65, letterSpacing: ".08em", textTransform: "uppercase" } }, "Ваш уровень"),
+        /*#__PURE__*/React.createElement("div", { style: { fontFamily: "var(--mf-font-display)", fontSize: 42, marginTop: 8, lineHeight: 1 } }, tier.name),
+        /*#__PURE__*/React.createElement("div", { style: { fontFamily: "var(--mf-font-display)", fontSize: 64, lineHeight: 1, margin: "18px 0 12px", letterSpacing: "-0.02em" } }, tier.disc),
+        /*#__PURE__*/React.createElement("p", { style: { fontSize: 13, lineHeight: 1.5, opacity: .85 } }, tier.desc),
+        /*#__PURE__*/React.createElement("ul", {
+          style: { listStyle: "none", padding: 0, marginTop: 18, display: "flex", flexDirection: "column", gap: 6, fontSize: 12, opacity: .9 }
+        }, QUIZ_STEPS.map(q => answers[q.key] && /*#__PURE__*/React.createElement("li", {
+          key: q.key, style: { display: "flex", gap: 8 }
+        }, /*#__PURE__*/React.createElement("span", { style: { opacity: .55 } }, q.title.replace("?", ":")), /*#__PURE__*/React.createElement("b", null, answers[q.key]))))
+      ),
+      /*#__PURE__*/React.createElement("form", {
+        onSubmit: e => { e.preventDefault(); setSent(true); },
+        style: { display: "flex", flexDirection: "column", gap: 12 }
+      },
+        /*#__PURE__*/React.createElement("h3", { style: { fontFamily: "var(--mf-font-display)", fontSize: 26, lineHeight: 1.1 } }, "Куда прислать прайс?"),
+        /*#__PURE__*/React.createElement("label", { style: { display: "flex", flexDirection: "column", gap: 6 } },
+          /*#__PURE__*/React.createElement("span", { className: "mf-mono", style: { fontSize: 10, textTransform: "uppercase", letterSpacing: ".08em", color: "var(--mf-stone-500)" } }, "Имя*"),
+          /*#__PURE__*/React.createElement("input", { className: "mf-input", required: true, value: contact.name, onChange: e => setContact(c => ({ ...c, name: e.target.value })), placeholder: "Иван Петров" })
+        ),
+        /*#__PURE__*/React.createElement("label", { style: { display: "flex", flexDirection: "column", gap: 6 } },
+          /*#__PURE__*/React.createElement("span", { className: "mf-mono", style: { fontSize: 10, textTransform: "uppercase", letterSpacing: ".08em", color: "var(--mf-stone-500)" } }, "Телефон*"),
+          /*#__PURE__*/React.createElement("input", { className: "mf-input", required: true, type: "tel", value: contact.phone, onChange: e => setContact(c => ({ ...c, phone: e.target.value })), placeholder: "+7 ___ ___-__-__" })
+        ),
+        /*#__PURE__*/React.createElement("label", { style: { display: "flex", flexDirection: "column", gap: 6 } },
+          /*#__PURE__*/React.createElement("span", { className: "mf-mono", style: { fontSize: 10, textTransform: "uppercase", letterSpacing: ".08em", color: "var(--mf-stone-500)" } }, "Компания / ИП"),
+          /*#__PURE__*/React.createElement("input", { className: "mf-input", value: contact.company, onChange: e => setContact(c => ({ ...c, company: e.target.value })), placeholder: "ИП Петров / ООО «Мебель Эра»" })
+        ),
+        /*#__PURE__*/React.createElement("button", {
+          type: "submit", className: "mf-btn mf-btn--primary mf-btn--lg",
+          style: { marginTop: 8, justifyContent: "center" }
+        }, "Получить КП с лучшими ценами ", Ic.arrowR),
+        /*#__PURE__*/React.createElement("div", { style: { fontSize: 11, color: "var(--mf-stone-500)", lineHeight: 1.45 } }, "Нажимая кнопку, вы соглашаетесь на обработку персональных данных и получение коммерческого предложения. Без рассылок."),
+        /*#__PURE__*/React.createElement("button", { type: "button", onClick: restart, className: "mf-btn mf-btn--sm mf-btn--light", style: { alignSelf: "flex-start", marginTop: 4 } }, "← Пройти заново")
+      )
+    )
+  ),
+
+  /* sent */
+  done && sent && /*#__PURE__*/React.createElement("div", {
+    style: { padding: "20px 0 6px", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 14 }
+  },
+    /*#__PURE__*/React.createElement("span", {
+      style: { width: 60, aspectRatio: "0.866/1", clipPath: "var(--hex-clip)", background: "var(--mf-green-500)", color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--mf-font-display)", fontSize: 26 }
+    }, "✓"),
+    /*#__PURE__*/React.createElement("h3", { style: { fontFamily: "var(--mf-font-display)", fontSize: 32, lineHeight: 1.05 } }, "Заявка отправлена."),
+    /*#__PURE__*/React.createElement("p", { style: { fontSize: 15, color: "var(--mf-stone-700)", lineHeight: 1.55, maxWidth: 520 } }, "Менеджер пришлёт прайс с лучшими ценами под ваш уровень «", tier.name, "» в течение часа в рабочее время. Если нужно срочно — звоните 8 800 555-04-07."),
+    /*#__PURE__*/React.createElement("button", { onClick: restart, className: "mf-btn mf-btn--light" }, "Пройти ещё раз")
+  )));
+};
+
 // ── FINAL CTA WITH FORM ────────────────────────────────────
 const FinalCTA = () => /*#__PURE__*/React.createElement("section", {
   style: {
@@ -1802,7 +1983,7 @@ const WholesalePage = () => /*#__PURE__*/React.createElement("div", {
   id: "cases"
 }, /*#__PURE__*/React.createElement(Cases, null)), /*#__PURE__*/React.createElement("section", {
   id: "faq"
-}, /*#__PURE__*/React.createElement(FAQ, null)), /*#__PURE__*/React.createElement(FinalCTA, null), /*#__PURE__*/React.createElement(WholesaleFooter, null));
+}, /*#__PURE__*/React.createElement(FAQ, null)), /*#__PURE__*/React.createElement(PurchaseQuiz, null), /*#__PURE__*/React.createElement(FinalCTA, null), /*#__PURE__*/React.createElement(WholesaleFooter, null));
 
 // ── Wholesale-specific footer (no shop nav) ────────────────
 const WholesaleFooter = () => /*#__PURE__*/React.createElement("footer", {
@@ -1878,7 +2059,7 @@ const WholesaleFooter = () => /*#__PURE__*/React.createElement("footer", {
     gap: 10,
     fontSize: 13
   }
-}, [["Категории", "#cats"], ["Условия и скидки", "#tiers"], ["Как мы работаем", "#flow"], ["Клиенты", "#cases"], ["FAQ", "#faq"]].map(([t, h]) => /*#__PURE__*/React.createElement("li", {
+}, [["Категории", "#cats"], ["Условия и скидки", "#tiers"], ["Как мы работаем", "#flow"], ["Клиенты", "#cases"], ["FAQ", "#faq"], ["Квиз на закупку", "#quiz"]].map(([t, h]) => /*#__PURE__*/React.createElement("li", {
   key: t
 }, /*#__PURE__*/React.createElement("a", {
   href: h,

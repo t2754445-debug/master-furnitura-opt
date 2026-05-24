@@ -206,3 +206,206 @@
 
 /* Scrollbar — invisible inside frames */
 .mf-frame ::-webkit-scrollbar { width: 0; height: 0; }
+
+/* ============================================================
+   RESPONSIVE — адаптив под планшеты и мобильные
+   Перебиваем React inline-стили через [style*=...] + !important
+   ============================================================ */
+
+/* ── ПЛАНШЕТ 768–1023px — мягкое уменьшение типографики и отступов ── */
+@media (max-width: 1023px) {
+  .mf-frame section[style*="padding"],
+  .mf-frame footer[style*="padding"] {
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+  }
+  .mf-frame header > div[style*="padding: 0 40px"] {
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+  }
+
+  .mf-frame [style*="font-size: 96px"] { font-size: 64px !important; }
+  .mf-frame [style*="font-size: 84px"] { font-size: 56px !important; }
+  .mf-frame [style*="font-size: 64px"] { font-size: 44px !important; }
+  .mf-frame [style*="font-size: 56px"] { font-size: 40px !important; }
+  .mf-frame [style*="font-size: 48px"] { font-size: 34px !important; }
+
+  .mf-frame [style*="gap: 60px"],
+  .mf-frame [style*="gap: 56px"] { gap: 32px !important; }
+
+  /* Категории / шаги — 4 → 2 колонки */
+  .mf-frame [style*="grid-template-columns: repeat(4"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  /* Лого клиентов 6 → 4 */
+  .mf-frame [style*="grid-template-columns: repeat(6"] {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+  /* Кейсы 3 → 2 */
+  .mf-frame [style*="grid-template-columns: repeat(3"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  /* Footer 4 → 2 */
+  .mf-frame [style*="grid-template-columns: 1.4fr 1fr 1fr 1.1fr"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* ── МОБИЛЬНЫЙ <768px — single column, переработка header, скрытие декора ── */
+@media (max-width: 767px) {
+
+  /* Документ — край-в-край */
+  .mf-stage { padding: 0 !important; background: var(--mf-paper) !important; }
+  .mf-doc {
+    width: 100% !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .mf-frame { font-size: 14px; }
+
+  /* Декоративные абсолютные слои (шестиугольники, кляксы) — выключаем */
+  .mf-frame [aria-hidden="true"] { display: none !important; }
+
+  /* Картинки/SVG не вылезают */
+  .mf-frame img, .mf-frame svg, .mf-frame picture {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* ── HEADER ── */
+  /* Скрываем верхнюю инфо-полосу и центральную nav */
+  .mf-frame header > div:first-child { display: none !important; }
+  .mf-frame header nav { display: none !important; }
+  /* Основная строка — лого слева, CTA справа, телефон-блок убираем */
+  .mf-frame header > div:last-child {
+    height: auto !important;
+    grid-template-columns: auto 1fr !important;
+    padding: 12px 16px !important;
+    gap: 12px !important;
+  }
+  .mf-frame header > div:last-child > div[style*="flex-end"] {
+    display: none !important;
+  }
+  .mf-frame header > div:last-child > div {
+    justify-content: flex-end !important;
+  }
+  /* Подпись "оптовые поставки" возле логотипа — компактнее */
+  .mf-frame header a[href="#top"] > span[style*="border-left"] {
+    padding-left: 10px !important;
+  }
+
+  /* ── СЕКЦИИ — единый padding ── */
+  .mf-frame section[style*="padding"],
+  .mf-frame footer[style*="padding"] {
+    padding: 48px 16px !important;
+  }
+
+  /* ── ВСЕ многоколоночные грид-сетки → 1 колонка ── */
+  .mf-frame [style*="grid-template-columns: repeat"],
+  .mf-frame [style*="grid-template-columns: 1.05fr"],
+  .mf-frame [style*="grid-template-columns: 1.4fr"],
+  .mf-frame [style*="grid-template-columns: 1fr 1.6fr"],
+  .mf-frame [style*="grid-template-columns: 1fr 1.1fr"],
+  .mf-frame [style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+  /* Лого клиентов держим в 2 колонки (плотный коллаж) */
+  .mf-frame [style*="grid-template-columns: repeat(6"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* span 2 в форме больше не имеет смысла — сбрасываем */
+  .mf-frame [style*="grid-column: span 2"] { grid-column: span 1 !important; }
+
+  /* ── FLEX строки с space-between → wrap ── */
+  .mf-frame [style*="space-between"][style*="display: flex"] {
+    flex-wrap: wrap !important;
+  }
+
+  /* ── ТИПОГРАФИКА — крупные размеры вниз ── */
+  .mf-frame [style*="font-size: 96px"] {
+    font-size: 38px !important;
+    letter-spacing: -0.025em !important;
+  }
+  .mf-frame [style*="font-size: 84px"] { font-size: 34px !important; }
+  .mf-frame [style*="font-size: 72px"] { font-size: 32px !important; }
+  .mf-frame [style*="font-size: 64px"] { font-size: 30px !important; }
+  .mf-frame [style*="font-size: 56px"] { font-size: 28px !important; }
+  .mf-frame [style*="font-size: 48px"] { font-size: 26px !important; }
+  .mf-frame [style*="font-size: 44px"] { font-size: 24px !important; }
+  .mf-frame [style*="font-size: 40px"] { font-size: 24px !important; }
+  .mf-frame [style*="font-size: 38px"] { font-size: 23px !important; }
+  .mf-frame [style*="font-size: 36px"] { font-size: 22px !important; }
+  .mf-frame [style*="font-size: 32px"] { font-size: 21px !important; }
+  .mf-frame [style*="font-size: 30px"] { font-size: 20px !important; }
+  .mf-frame [style*="font-size: 28px"] { font-size: 19px !important; }
+  .mf-frame [style*="font-size: 26px"] { font-size: 18px !important; }
+  .mf-frame [style*="font-size: 24px"] { font-size: 17px !important; }
+  .mf-frame [style*="font-size: 22px"] { font-size: 17px !important; }
+  .mf-frame [style*="font-size: 20px"] { font-size: 16px !important; }
+
+  /* ── БОЛЬШИЕ GAP'ы вниз ── */
+  .mf-frame [style*="gap: 60px"],
+  .mf-frame [style*="gap: 56px"],
+  .mf-frame [style*="gap: 48px"],
+  .mf-frame [style*="gap: 40px"] { gap: 20px !important; }
+  .mf-frame [style*="gap: 32px"],
+  .mf-frame [style*="gap: 30px"] { gap: 16px !important; }
+  .mf-frame [style*="gap: 24px"] { gap: 14px !important; }
+
+  /* ── БОЛЬШИЕ margin'ы ── */
+  .mf-frame [style*="margin-bottom: 56px"],
+  .mf-frame [style*="margin-bottom: 48px"],
+  .mf-frame [style*="margin-bottom: 40px"] { margin-bottom: 22px !important; }
+  .mf-frame [style*="margin-bottom: 32px"],
+  .mf-frame [style*="margin-bottom: 28px"] { margin-bottom: 18px !important; }
+  .mf-frame [style*="margin-top: 56px"],
+  .mf-frame [style*="margin-top: 48px"],
+  .mf-frame [style*="margin-top: 36px"],
+  .mf-frame [style*="margin-top: 32px"] { margin-top: 22px !important; }
+
+  /* ── min-height у карточек — снимаем (тянутся по контенту) ── */
+  .mf-frame [style*="min-height: 360px"],
+  .mf-frame [style*="min-height: 280px"],
+  .mf-frame [style*="min-height: 260px"],
+  .mf-frame [style*="min-height: 240px"] { min-height: auto !important; }
+
+  /* ── ВНУТРИ карточек / aside — меньше padding ── */
+  .mf-frame [style*="padding: 36px"] { padding: 22px !important; }
+  .mf-frame [style*="padding: 32px"] { padding: 20px !important; }
+  .mf-frame [style*="padding: 26px 24px 24px"] { padding: 20px !important; }
+  .mf-frame [style*="padding: 24px"] { padding: 18px !important; }
+  .mf-frame [style*="padding: 22px 28px"] { padding: 16px 18px !important; }
+  .mf-frame [style*="padding: 22px 22px 22px"] { padding: 16px !important; }
+
+  /* Featured tier — убираем сдвиг */
+  .mf-frame [style*="translateY(-8px)"] { transform: none !important; }
+
+  /* FAQ — убираем правый «зарезерв» под текстом */
+  .mf-frame [style*="padding-right: 60px"] { padding-right: 0 !important; }
+
+  /* Кнопки FAQ — крупнее tap-area */
+  .mf-frame .mf-btn--sm { min-height: 36px; }
+
+  /* Hero stats: подписи (большие числа 38px → 24px уже выше) — выравниваем */
+  .mf-frame [style*="padding-left: 22"] { padding-left: 14px !important; }
+
+  /* Подложка «прайс с лучшими ценами» — pop-aside смещение убираем */
+  .mf-frame [style*="top: -14px"] { left: 16px !important; }
+
+  /* Footer copyright row — стек */
+  .mf-frame footer > div[style*="border-top"][style*="space-between"] {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    text-align: left !important;
+  }
+
+  /* Кнопки — компактнее, не вылезают за край */
+  .mf-frame .mf-btn { max-width: 100%; white-space: normal; height: auto !important; min-height: 44px; padding-top: 10px; padding-bottom: 10px; line-height: 1.2; }
+
+  /* Текстовые input/textarea — full-width, нормальный font-size (16px чтобы iOS не зумил) */
+  .mf-frame input, .mf-frame textarea, .mf-frame select { font-size: 16px !important; }
+}
