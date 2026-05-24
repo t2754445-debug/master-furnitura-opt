@@ -1,0 +1,208 @@
+/* ============================================================
+   МАСТЕР ФУРНИТУРА — Design tokens
+   Concept: «Cex + ателье» — техническая точность + рукодельная эмоция
+   ============================================================ */
+
+:root {
+  /* Brand greens */
+  --mf-green-900: #0E3322;
+  --mf-green-700: #1F5A3A;   /* primary */
+  --mf-green-500: #2D7A52;
+  --mf-green-300: #6FBF8F;   /* accent / mint */
+  --mf-green-100: #D9EBDF;
+  --mf-green-50:  #EDF5EF;
+
+  /* Neutrals — warm-toned */
+  --mf-ink:       #14181A;
+  --mf-graphite:  #1A1A1A;
+  --mf-stone-700: #3A3A38;
+  --mf-stone-500: #6B6B66;
+  --mf-stone-400: #8F8F88;
+  --mf-stone-300: #C7C5BD;
+  --mf-stone-200: #E4E1D7;
+  --mf-stone-100: #EFECE3;
+  --mf-paper:     #FAF8F3;   /* primary off-white */
+  --mf-paper-2:   #F4F1E8;
+  --mf-white:     #FFFFFF;
+
+  /* Functional */
+  --mf-red:       #B8412B;   /* sale / error */
+  --mf-amber:     #C68A2E;   /* hit / opt-discount */
+  --mf-azure:     #2F5C8A;   /* info */
+
+  /* Type */
+  --mf-font-display: "Unbounded", "Manrope", system-ui, sans-serif;
+  --mf-font-text:    "Onest", "Manrope", system-ui, sans-serif;
+  --mf-font-mono:    "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  /* Radii */
+  --mf-r-xs: 4px;
+  --mf-r-sm: 8px;
+  --mf-r-md: 12px;
+  --mf-r-lg: 18px;
+
+  /* Shadows */
+  --mf-shadow-card: 0 1px 0 rgba(20,24,26,.04), 0 6px 22px -10px rgba(20,24,26,.18);
+  --mf-shadow-pop:  0 24px 60px -20px rgba(14,51,34,.30), 0 4px 12px rgba(20,24,26,.06);
+
+  /* Hexagon — pointy-top, derived ratio: width:height = √3 : 2  ≈ 0.866 */
+  --hex-clip: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+/* Base layer */
+.mf-frame {
+  background: var(--mf-paper);
+  color: var(--mf-graphite);
+  font-family: var(--mf-font-text);
+  font-size: 15px;
+  line-height: 1.45;
+  letter-spacing: -0.005em;
+  font-feature-settings: "ss01", "ss02", "cv11";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+.mf-frame *, .mf-frame *::before, .mf-frame *::after {
+  box-sizing: border-box;
+}
+.mf-frame h1, .mf-frame h2, .mf-frame h3, .mf-frame h4 {
+  font-family: var(--mf-font-display);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.02;
+  margin: 0;
+  color: var(--mf-ink);
+}
+.mf-frame p { margin: 0; }
+.mf-frame button { font: inherit; cursor: pointer; }
+.mf-frame a { color: inherit; text-decoration: none; }
+
+/* Mono / SKU */
+.mf-mono { font-family: var(--mf-font-mono); font-size: .78em; letter-spacing: 0; }
+.mf-tab  { font-feature-settings: "tnum"; }
+
+/* Hex utilities */
+.mf-hex {
+  clip-path: var(--hex-clip);
+  aspect-ratio: 0.866 / 1;
+}
+.mf-hex-row { display: flex; }
+
+/* Stitched dashed border — needle and thread motif */
+.mf-stitch {
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--mf-stone-400) 0 6px, transparent 6px 12px
+  );
+  background-size: 100% 1px;
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+}
+
+/* Striped placeholder for missing product imagery */
+.mf-placeholder {
+  background:
+    repeating-linear-gradient(
+      135deg,
+      var(--mf-stone-200) 0 8px,
+      var(--mf-stone-100) 8px 16px
+    );
+  color: var(--mf-stone-500);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mf-font-mono);
+  font-size: 11px;
+  letter-spacing: .04em;
+  text-transform: lowercase;
+}
+
+/* Buttons */
+.mf-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 44px; padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-weight: 500; font-size: 14px;
+  letter-spacing: -0.005em;
+  transition: background .14s ease, color .14s, border-color .14s, transform .12s;
+  white-space: nowrap;
+}
+.mf-btn--primary {
+  background: var(--mf-green-700); color: #fff;
+}
+.mf-btn--primary:hover { background: var(--mf-green-900); }
+.mf-btn--ghost {
+  background: transparent; color: var(--mf-ink); border-color: var(--mf-stone-300);
+}
+.mf-btn--ghost:hover { border-color: var(--mf-ink); }
+.mf-btn--light {
+  background: var(--mf-white); color: var(--mf-ink); border-color: var(--mf-stone-200);
+}
+.mf-btn--sm { height: 34px; padding: 0 14px; font-size: 13px; }
+.mf-btn--lg { height: 52px; padding: 0 24px; font-size: 15px; }
+.mf-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+/* Input */
+.mf-input {
+  height: 44px; padding: 0 14px;
+  border: 1px solid var(--mf-stone-200);
+  border-radius: var(--mf-r-sm);
+  background: var(--mf-white);
+  font: inherit;
+  color: var(--mf-ink);
+  transition: border-color .14s, box-shadow .14s;
+  width: 100%;
+}
+.mf-input:focus {
+  outline: none;
+  border-color: var(--mf-green-700);
+  box-shadow: 0 0 0 3px var(--mf-green-100);
+}
+
+/* Tag / chip */
+.mf-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 28px; padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: var(--mf-stone-100);
+  color: var(--mf-stone-700);
+  border: 1px solid transparent;
+}
+.mf-chip--solid { background: var(--mf-ink); color: #fff; }
+.mf-chip--mint  { background: var(--mf-green-100); color: var(--mf-green-900); }
+.mf-chip--amber { background: rgba(198,138,46,.14); color: var(--mf-amber); }
+.mf-chip--red   { background: rgba(184,65,43,.10); color: var(--mf-red); }
+
+/* Section labels — small caps with hyphen */
+.mf-eyebrow {
+  font-family: var(--mf-font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  color: var(--mf-stone-500);
+}
+.mf-eyebrow::before { content: "— "; }
+
+/* Hex badge — discount/new */
+.mf-hex-badge {
+  position: absolute;
+  width: 46px; aspect-ratio: 0.866/1;
+  clip-path: var(--hex-clip);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mf-font-display);
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 500;
+  color: #fff;
+}
+
+/* Subtle in-grid hex pattern */
+.mf-hex-pattern {
+  background-color: var(--mf-paper);
+  background-image:
+    radial-gradient(circle at 25% 25%, rgba(31,90,58,.04) 0 1.5px, transparent 2px),
+    radial-gradient(circle at 75% 75%, rgba(31,90,58,.04) 0 1.5px, transparent 2px);
+  background-size: 28px 28px;
+}
+
+/* Scrollbar — invisible inside frames */
+.mf-frame ::-webkit-scrollbar { width: 0; height: 0; }
