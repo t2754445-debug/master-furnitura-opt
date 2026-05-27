@@ -1,5 +1,23 @@
 /* global React, Ic, HexPh, Ph, Footer, formatPrice, Logo */
 
+// ── Lead delivery: n8n webhook ──────────────────────────────
+const LEAD_WEBHOOK_URL = "https://n8n-push-t2754445.amvera.io/webhook/os-seller-lead";
+
+const sendLead = async (payload) => {
+  const res = await fetch(LEAD_WEBHOOK_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      ...payload,
+      source: "os-seller.ru",
+      page: typeof window !== "undefined" ? window.location.href : "",
+      ts: new Date().toISOString()
+    })
+  });
+  if (!res.ok) throw new Error("HTTP " + res.status);
+  return res;
+};
+
 // ── Wholesale-only header (no shop chrome) ──────────────────
 const WholesaleHeader = () => {
   const links = [["Категории", "#cats"], ["Условия", "#tiers"], ["Как работаем", "#flow"], ["Клиенты", "#cases"], ["Вопросы", "#faq"], ["Квиз", "#quiz"]];
@@ -267,23 +285,47 @@ const LeadForm = ({
     volume: "30–100 тыс. ₽",
     comment: ""
   });
+  const [status, setStatus] = React.useState("idle"); // idle | sending | ok | err
+  const honeypotRef = React.useRef(null);
   const upd = k => e => setForm(f => ({
     ...f,
     [k]: e.target.value
   }));
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (status === "sending" || status === "ok") return;
+    if (honeypotRef.current && honeypotRef.current.value) return; // bot trap
+    setStatus("sending");
+    try {
+      await sendLead({ form_id: id, type: "lead-form", ...form });
+      setStatus("ok");
+    } catch (err) {
+      console.error("Lead send failed:", err);
+      setStatus("err");
+    }
+  };
   const inputBg = dark ? "rgba(255,255,255,.06)" : "var(--mf-white)";
   const inputBorder = dark ? "rgba(255,255,255,.12)" : "var(--mf-stone-200)";
   const inputFg = dark ? "#fff" : "var(--mf-ink)";
   const labelFg = dark ? "rgba(255,255,255,.55)" : "var(--mf-stone-500)";
   return /*#__PURE__*/React.createElement("form", {
     id: id,
-    onSubmit: e => e.preventDefault(),
+    onSubmit: submit,
     style: {
       display: "grid",
       gridTemplateColumns: "1fr 1fr",
       gap: 14
     }
-  }, /*#__PURE__*/React.createElement(LFField, {
+  }, /*#__PURE__*/React.createElement("input", {
+    ref: honeypotRef,
+    type: "text",
+    name: "website",
+    tabIndex: -1,
+    autoComplete: "off",
+    "aria-hidden": "true",
+    style: { position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }
+  }), /*#__PURE__*/React.createElement(LFField, {
     dark: dark,
     value: form.name,
     onChange: upd("name"),
@@ -381,6 +423,7 @@ const LeadForm = ({
     }
   }), /*#__PURE__*/React.createElement("span", null, "\u0421\u043E\u0433\u043B\u0430\u0441\u0435\u043D \u043D\u0430 \u043E\u0431\u0440\u0430\u0431\u043E\u0442\u043A\u0443 \u043F\u0435\u0440\u0441\u043E\u043D\u0430\u043B\u044C\u043D\u044B\u0445 \u0434\u0430\u043D\u043D\u044B\u0445 \u0438 \u043F\u043E\u043B\u0443\u0447\u0435\u043D\u0438\u0435 \u043A\u043E\u043C\u043C\u0435\u0440\u0447\u0435\u0441\u043A\u043E\u0433\u043E \u043F\u0440\u0435\u0434\u043B\u043E\u0436\u0435\u043D\u0438\u044F.")), /*#__PURE__*/React.createElement("button", {
     type: "submit",
+    disabled: status === "sending" || status === "ok",
     className: "mf-btn mf-btn--lg",
     style: {
       background: dark ? "var(--mf-green-300)" : "var(--mf-green-700)",
@@ -388,9 +431,26 @@ const LeadForm = ({
       height: 54,
       padding: "0 28px",
       fontSize: 15,
-      fontWeight: 600
+      fontWeight: 600,
+      opacity: status === "sending" ? 0.7 : 1,
+      cursor: status === "sending" || status === "ok" ? "default" : "pointer"
     }
-  }, "\u041F\u043E\u043B\u0443\u0447\u0438\u0442\u044C \u043F\u0440\u0430\u0439\u0441 \u0441 \u043B\u0443\u0447\u0448\u0438\u043C\u0438 \u0446\u0435\u043D\u0430\u043C\u0438 ", Ic.arrowR)), /*#__PURE__*/React.createElement("div", {
+  }, status === "sending" ? "\u041E\u0442\u043F\u0440\u0430\u0432\u043B\u044F\u0435\u043C\u2026" : status === "ok" ? "\u0417\u0430\u044F\u0432\u043A\u0430 \u043E\u0442\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0430 \u2713" : ["\u041F\u043E\u043B\u0443\u0447\u0438\u0442\u044C \u043F\u0440\u0430\u0439\u0441 \u0441 \u043B\u0443\u0447\u0448\u0438\u043C\u0438 \u0446\u0435\u043D\u0430\u043C\u0438 ", Ic.arrowR])), status !== "idle" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      gridColumn: "span 2",
+      padding: "12px 14px",
+      borderRadius: 8,
+      fontSize: 14,
+      lineHeight: 1.4,
+      background: status === "ok" ? "rgba(20,160,90,.10)" : status === "err" ? "rgba(200,40,40,.10)" : "rgba(120,120,120,.08)",
+      color: status === "ok" ? "var(--mf-green-700)" : status === "err" ? "#c82828" : labelFg,
+      border: `1px solid ${status === "ok" ? "rgba(20,160,90,.25)" : status === "err" ? "rgba(200,40,40,.25)" : "rgba(120,120,120,.18)"}`
+    }
+  }, status === "ok"
+    ? "\u0421\u043F\u0430\u0441\u0438\u0431\u043E! \u041C\u0435\u043D\u0435\u0434\u0436\u0435\u0440 \u043F\u0440\u0438\u0448\u043B\u0451\u0442 \u043F\u0440\u0430\u0439\u0441 \u0432 \u0442\u0435\u0447\u0435\u043D\u0438\u0435 \u0447\u0430\u0441\u0430 \u0432 \u0440\u0430\u0431\u043E\u0447\u0435\u0435 \u0432\u0440\u0435\u043C\u044F."
+    : status === "err"
+    ? "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043E\u0442\u043F\u0440\u0430\u0432\u0438\u0442\u044C. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0435\u0449\u0451 \u0440\u0430\u0437 \u0438\u043B\u0438 \u043F\u043E\u0437\u0432\u043E\u043D\u0438\u0442\u0435 8 800 555-04-07."
+    : "\u041E\u0442\u043F\u0440\u0430\u0432\u043B\u044F\u0435\u043C \u0437\u0430\u044F\u0432\u043A\u0443\u2026"), /*#__PURE__*/React.createElement("div", {
     style: {
       gridColumn: "span 2",
       display: "flex",
@@ -1645,6 +1705,8 @@ const PurchaseQuiz = () => {
   const [answers, setAnswers] = React.useState({});
   const [contact, setContact] = React.useState({ name: "", phone: "", company: "" });
   const [sent, setSent] = React.useState(false);
+  const [sending, setSending] = React.useState(false);
+  const [sendError, setSendError] = React.useState("");
 
   const total = QUIZ_STEPS.length;
   const done = step >= total;
@@ -1660,7 +1722,23 @@ const PurchaseQuiz = () => {
     setTimeout(() => setStep(s => Math.min(s + 1, total)), 180);
   };
   const back = () => setStep(s => Math.max(0, s - 1));
-  const restart = () => { setStep(0); setAnswers({}); setContact({ name: "", phone: "", company: "" }); setSent(false); };
+  const restart = () => { setStep(0); setAnswers({}); setContact({ name: "", phone: "", company: "" }); setSent(false); setSending(false); setSendError(""); };
+
+  const submitQuiz = async (e) => {
+    e.preventDefault();
+    if (sending) return;
+    setSending(true);
+    setSendError("");
+    try {
+      await sendLead({ type: "quiz", form_id: "quiz", tier: tier.name, discount: tier.disc, answers, ...contact });
+      setSent(true);
+    } catch (err) {
+      console.error("Quiz send failed:", err);
+      setSendError("Не удалось отправить. Попробуйте ещё раз или позвоните 8 800 555-04-07.");
+    } finally {
+      setSending(false);
+    }
+  };
 
   const progress = Math.min(100, Math.round(((done ? total : step) / total) * 100));
 
@@ -1753,7 +1831,7 @@ const PurchaseQuiz = () => {
         }, /*#__PURE__*/React.createElement("span", { style: { opacity: .55 } }, q.title.replace("?", ":")), /*#__PURE__*/React.createElement("b", null, answers[q.key]))))
       ),
       /*#__PURE__*/React.createElement("form", {
-        onSubmit: e => { e.preventDefault(); setSent(true); },
+        onSubmit: submitQuiz,
         style: { display: "flex", flexDirection: "column", gap: 12 }
       },
         /*#__PURE__*/React.createElement("h3", { style: { fontFamily: "var(--mf-font-display)", fontSize: 26, lineHeight: 1.1 } }, "Куда прислать прайс?"),
@@ -1771,8 +1849,12 @@ const PurchaseQuiz = () => {
         ),
         /*#__PURE__*/React.createElement("button", {
           type: "submit", className: "mf-btn mf-btn--primary mf-btn--lg",
-          style: { marginTop: 8, justifyContent: "center" }
-        }, "Получить КП с лучшими ценами ", Ic.arrowR),
+          disabled: sending,
+          style: { marginTop: 8, justifyContent: "center", opacity: sending ? 0.7 : 1, cursor: sending ? "default" : "pointer" }
+        }, sending ? "Отправляем…" : ["Получить КП с лучшими ценами ", Ic.arrowR]),
+        sendError && /*#__PURE__*/React.createElement("div", {
+          style: { padding: "10px 12px", borderRadius: 8, background: "rgba(200,40,40,.10)", color: "#c82828", border: "1px solid rgba(200,40,40,.25)", fontSize: 13, lineHeight: 1.4 }
+        }, sendError),
         /*#__PURE__*/React.createElement("div", { style: { fontSize: 11, color: "var(--mf-stone-500)", lineHeight: 1.45 } }, "Нажимая кнопку, вы соглашаетесь на обработку персональных данных и получение коммерческого предложения. Без рассылок."),
         /*#__PURE__*/React.createElement("button", { type: "button", onClick: restart, className: "mf-btn mf-btn--sm mf-btn--light", style: { alignSelf: "flex-start", marginTop: 4 } }, "← Пройти заново")
       )
